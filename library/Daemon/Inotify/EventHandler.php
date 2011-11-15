@@ -1,6 +1,7 @@
 <?php
 namespace Daemon\Inotify;
-use Daemon\Inotify\Observer\Event;
+use Daemon\Inotify\Observer\Event,
+    Daemon\System\FileHandler;
 
 /**
  * The event handler is in fact an event organizer, it filters all events and
@@ -28,10 +29,16 @@ class EventHandler implements \SplSubject
 
     /**
      *
-     * @var System_Inotify
+     * @var Watcher
      */
     protected $_inotify;
 
+    /**
+     * will parse all events using the protected methods, then will start the
+     * object storage to atach the event observers
+     *
+     * @param resource $resource needs a inotify extension resource to work
+     */
     public function __construct($resource)
     {
         if (!is_resource($resource)) {
@@ -47,13 +54,6 @@ class EventHandler implements \SplSubject
             $this->_parseRemoved();
             $this->_parseModified();
             $this->_parseCreated();
-            $behaviors = new System_Inotify_DefaultBehaviors(
-                $this->_inotify,
-                $this
-            );
-
-            $behaviors->onCreate();
-            $behaviors->onModify();
         } else {
             $this->_isEmpty = true;
         }
@@ -63,18 +63,22 @@ class EventHandler implements \SplSubject
     }
 
     /**
+     * returns a filename based on the file descriptor
      *
-     * @param <type> $event
-     * @return System_FileHandler 
+     * @param array $event should be an inotify event array
+     * @return FileHandler
      */
     protected function _getFileName($event)
     {
         $descriptor = $this->_inotify->getDescriptor($event['wd']);
         $filename = $descriptor->getPathname()."/".$event['name'];
 
-        return new System_FileHandler($filename);
+        return new FileHandler($filename);
     }
 
+    /**
+     * extracts from the event array all moved files
+     */
     protected function _parseMoved()
     {
         $moved = array();
@@ -89,6 +93,9 @@ class EventHandler implements \SplSubject
         $this->_moved = $moved;
     }
 
+    /**
+     * extracts from the event array all removed files
+     */
     protected function _parseRemoved()
     {
         $removed = array();
@@ -106,6 +113,9 @@ class EventHandler implements \SplSubject
         $this->_removed = $removed;
     }
 
+    /**
+     * extracts from the event array all modified files
+     */
     protected function _parseModified()
     {
         foreach ($this->_events as $key=>$event) {
@@ -118,6 +128,9 @@ class EventHandler implements \SplSubject
         }
     }
 
+    /**
+     * extracts from the event array all created files
+     */
     protected function _parseCreated()
     {
         foreach ($this->_events as $key=>$event) {
@@ -130,6 +143,9 @@ class EventHandler implements \SplSubject
         }
     }
 
+    /**
+     * removes from the event array all unamed files
+     */
     protected function _filterNoName()
     {
         foreach ($this->_events as $key=>$event) {
@@ -139,6 +155,11 @@ class EventHandler implements \SplSubject
         }
     }
 
+    /**
+     * checks if events stacks are all empty
+     *
+     * @return <type> 
+     */
     public function isEmpty()
     {
         if ($this->_isEmpty
@@ -152,17 +173,28 @@ class EventHandler implements \SplSubject
         return false;
     }
 
+    /**
+     * return parsed moved files
+     *
+     * @return array 
+     */
     public function getMoved()
     {
         return $this->_moved;
     }
 
+    /**
+     * return parsed removed files
+     *
+     * @return array
+     */
     public function getRemoved()
     {
         return $this->_removed;
     }
 
     /**
+     * return parsed created files
      *
      * @return array
      */
@@ -171,11 +203,19 @@ class EventHandler implements \SplSubject
         return $this->_created;
     }
 
+    /**
+     * return parsed modified files
+     *
+     * @return array
+     */
     public function getModified()
     {
         return $this->_modified;
     }
 
+    /**
+     * Class logger
+     */
     public function log()
     {
         ob_start();
@@ -202,6 +242,11 @@ class EventHandler implements \SplSubject
         System_Daemon::log(System_Daemon::LOG_INFO, $log);
     }
 
+    /**
+     * Attach an observer to the class
+     *
+     * @param \SplObserver $observer 
+     */
     public function attach(\SplObserver $observer)
     {
         if (!$observer instanceof Event) {
@@ -213,11 +258,19 @@ class EventHandler implements \SplSubject
         $this->_observers->attach($observer);
     }
 
+    /**
+     * detach an observer
+     *
+     * @param \SplObserver $observer 
+     */
     public function detach(\SplObserver $observer)
     {
         $this->_observers->detach($observer);
     }
 
+    /**
+     * executes the observers
+     */
     public function notify()
     {
         foreach ($this->_observers as $observer) {

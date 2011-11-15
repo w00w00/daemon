@@ -18,8 +18,6 @@ abstract class Runner implements IDaemon
      */
     protected $_dispatcher;
     protected $_isChild = false;
-    private static $_isDying = false;
-
 
     /**
      *
@@ -43,9 +41,8 @@ abstract class Runner implements IDaemon
 
     public static function isDying()
     {
-        return self::$_isDying;
+        return Starter::isDying();
     }
-
 
     /**
      *
@@ -99,13 +96,6 @@ abstract class Runner implements IDaemon
     protected function _log($content, $level = 1)
     {
         
-    }
-
-    protected function _sigTerm($signal)
-    {
-        if ($signal == SIGTERM) {
-            self::$_isDying = true;
-        }
     }
 
     /**
