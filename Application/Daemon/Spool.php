@@ -13,6 +13,9 @@ class Spool extends Runner
     private $_childNum   = 0;
     private $_isChild    = false;
 
+    /**
+     * init the signals
+     */
     protected function _init()
     {
         $signals = array(SIGALRM, SIGCHLD);
@@ -22,6 +25,11 @@ class Spool extends Runner
         }
     }
 
+    /**
+     * signal handler routine
+     *
+     * @param int $signal
+     */
     protected function _signalHandler($signal)
     {
         switch ($signal) {
@@ -38,11 +46,17 @@ class Spool extends Runner
         }
     }
 
+    /**
+     * Counts and update the number of child processes
+     */
     protected function _updateChildNum()
     {
         $this->_childNum = count($this->_childArray);
     }
     
+    /**
+     * fetches a request from the spool database and executes it
+     */
     public function run()
     {
         $this->_startDatabase();
@@ -72,6 +86,11 @@ class Spool extends Runner
         
     }
 
+    /**
+     * updates the child processes count on susessfull fork
+     *
+     * @param <type> $pid 
+     */
     protected function _parentCallBack($pid)
     {
         $this->_childArray[] = $pid;
@@ -90,6 +109,11 @@ class Spool extends Runner
         }
     }
 
+    /**
+     * fetches the next request from the spool database
+     *
+     * @return Row
+     */
     protected function _fetchNextRequest()
     {
         $order = array('priority' => 1, 'done' => -1);

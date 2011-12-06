@@ -1,8 +1,8 @@
 <?php
 namespace Daemon\System;
 
-use Application\Action,
-    Application\Daemon;
+use Daemon\Action\Action;
+use Daemon\System\Daemon\Starter;
 
 /**
  * The dispatcher dispatches an requested action, wich gota be an instance of
@@ -159,7 +159,7 @@ class Dispatcher
     {
         $daemon = Daemon::factory($this->_class, $this);
 
-        $systemDaemon = new \DaemonStarter($this);
+        $systemDaemon = new Starter($this);
         $systemDaemon->start();
         $daemon->run();
         $systemDaemon->stop();

@@ -4,7 +4,7 @@ namespace Daemon\Convert\Strategy;
 use Daemon\System\FileInfo,
     Daemon\Convert\Strategy;
 
-class Convert
+class Context
 {
     /**
      * source file info class
