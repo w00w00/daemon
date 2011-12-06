@@ -1,7 +1,7 @@
 <?php
 namespace Daemon\Standard;
 
-use Daemon\Convert,
+use Daemon\Convert\Strategy\Context,
     Daemon\System\FileInfo;
 
 interface IEngine
@@ -11,11 +11,11 @@ interface IEngine
     /**
      * @return IEngine
      */
-    public function resize(Convert $config);
+    public function resize(Context $config);
 
-    public function crop(Convert $config);
+    public function crop(Context $config);
 
-    public function watermark(Convert $config, FileInfo $mark);
+    public function watermark(Context $config, FileInfo $mark);
 
     public function saveTo(FileInfo $path);
 }

@@ -14,7 +14,7 @@ class Image extends Strategy
      */
     public function defaultConversion()
     {
-        $this->_engine->resize($this->_convert)
-            ->saveTo($this->_convert->getDestination());
+        $this->_engine->resize($this->_context)
+            ->saveTo($this->_context->getDestination());
     }
 }

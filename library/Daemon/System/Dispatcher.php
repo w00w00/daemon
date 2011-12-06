@@ -167,6 +167,7 @@ class Dispatcher
 
     public function dispatchAction()
     {
-        Action::factory($this->_class, $this);
+        $action = Action::factory($this->_class, $this);
+        $action->execute();
     }
 }

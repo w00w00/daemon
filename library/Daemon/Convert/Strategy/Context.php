@@ -25,14 +25,14 @@ class Context
      *
      * @var float
      */
-    protected $_width;
+    protected $_width = '320';
 
     /**
      * height of destination file
      *
      * @var float
      */
-    protected $_height;
+    protected $_height = '240';
 
     /**
      * constructor, can set destination and source for the class
@@ -58,6 +58,12 @@ class Context
      */
     public function setSource(FileInfo $source)
     {
+        if (!$source->exists()) {
+            throw new \UnexpectedValueException(
+                "file {$source} doesn't exists"
+            );
+        }
+        
         $this->_source = $source;
 
         return $this;

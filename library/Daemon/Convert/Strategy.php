@@ -6,6 +6,12 @@ use Daemon\Standard\IEngine;
 use Daemon\Convert\Strategy\Engine,
     Daemon\Convert\Strategy\Context;
 
+/**
+ * The strategy class selects convertion strategy wich best suits the source
+ * and destination file, acording to the source mime type
+ *
+ * @author Jhonatan Teixeira
+ */
 abstract class Strategy
 {
     /**
@@ -40,8 +46,12 @@ abstract class Strategy
         $source      = $context->getSource();
         $destination = $context->getDestination();
 
-        $mime = $source->getMimeType();
-        $className = "Classes\\Strategy\\" . str_replace("/", "\\", $mime);
+        $mime                  = $source->getMimeType();
+        list($strategy, $type) = explode("/", $mime);
+        $strategy              = ucfirst($strategy);
+        $type                  = ucfirst($type);
+
+        $className = "Daemon\\Convert\\Strategy\\$strategy\\$type";
 
         if (!class_exists($className, true)) {
             $className = preg_replace("/\/.*$/", "", $className);
@@ -51,7 +61,7 @@ abstract class Strategy
 
         if (!$class instanceof  self) {
             throw new \Exception(
-                "Strategy $className must be sub of Classes\Strategy"
+                "Strategy $className must be sub of Daemon\\Convert\\Strategy"
             );
         }
 
@@ -73,14 +83,14 @@ abstract class Strategy
             );
         }
 
-        $className = "Engine\\{$this->_engineClassName}";
+        $className = "Daemon\\Convert\\Strategy\\Engine\\{$this->_engineClassName}";
 
         $this->_engine = new $className();
-        $this->_engine->setFile($context->getDestination());
+        $this->_engine->setFile($context->getSource());
 
         if (!$this->_engine instanceof IEngine) {
             throw new \RuntimeException(
-                "Engine $className must be implement Classes\\Standard\\IEngine"
+                "Engine $className must implement Daemon\\Standard\\IEngine"
             );
         }
 
@@ -89,6 +99,9 @@ abstract class Strategy
         $this->_init();
     }
 
+    /**
+     * fake constructor, can be overriden by child classes
+     */
     protected function _init()
     {
         

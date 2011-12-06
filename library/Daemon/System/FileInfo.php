@@ -26,6 +26,10 @@ class FileInfo extends \SplFileInfo
      */
     public function getMimeType()
     {
+        if (!$this->exists()) {
+            throw new Exception("can't get mime type from inexistent file");
+        }
+
         return MimeType::getMime($this);
     }
 
